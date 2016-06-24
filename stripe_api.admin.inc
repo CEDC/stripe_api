@@ -39,7 +39,8 @@ function stripe_api_admin_settings_form($form, $form_state) {
   );
   $form['mode'] = array(
     '#type' => 'radios',
-    '#title' => t('Mode'),
+    '#title' => t('Global/default mode'),
+    '#description' => t('This global default setting may be overridden by other modules.');
     '#options' => array(
       'test' => t('Test'),
       'live' => t('Live'),

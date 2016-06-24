@@ -37,10 +37,13 @@ The main way to make Stripe API calls is using the `stripe_api_call` function.
  * @param mixed $params
  *   Additional params to pass to the method. Can be an array, string.
  *
+ * @param string $mode
+ *   'live' or 'test'. If left off the global default will be used.
+ *
  * @return Stripe\ApiResource
  *   Returns the ApiResource or NULL on error.
  */
-stripe_api_call($obj, $method = NULL, $params = NULL) { ... }
+stripe_api_call($obj, $method = NULL, $params = NULL, $mode = NULL) { ... }
 
 // Examples.
 
