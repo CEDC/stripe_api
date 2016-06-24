@@ -12,6 +12,7 @@ function stripe_api_requirements($phase) {
   $t = get_t();
   switch ($phase) {
     case 'runtime':
+      // Check for Stripe PHP Bindings
       $stripe = libraries_load('stripe');
 
       if (!$stripe || !$stripe['loaded']) {
@@ -34,6 +35,28 @@ function stripe_api_requirements($phase) {
           'severity' => REQUIREMENT_OK,
         );
       }
+
+      $config = config('stripe_api.settings');
+      $secretconfig = config('stripe_api_secret.settings');
+      // Check for Stripe keys.
+      if ($secretconfig->get('test_secret_key') && $config->get('test_public_key') && $config->get('live_public_key') && $secretconfig->get('live_secret_key')) {
+        $requirements['stripe_api_keys'] = array(
+          'title' => $t('Stripe API keys'),
+          'value' => $t('Configured'),
+          'severity' => REQUIREMENT_OK,
+        );
+      }
+      else {
+        $requirements['stripe_api_keys'] = array(
+          'title' => $t('Stripe API keys'),
+          'value' => $t('Not configured'),
+          'severity' => REQUIREMENT_ERROR,
+          'description' => $t('Stripe API keys are not configured. <a href="!url">Configure them here</a>.', array(
+            '!url' => url('admin/config/services/stripe_api'),
+          )),
+        );
+      }
+
 
       break;
   }

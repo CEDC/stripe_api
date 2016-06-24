@@ -22,8 +22,11 @@
  * @return Stripe\ApiResource
  *   Returns the ApiResource or NULL on error.
  */
-function stripe_api_call($obj, $method = NULL, $params = NULL) {
-  libraries_load('stripe');
+function stripe_api_call($obj, $method = NULL, $params = NULL, $mode = NULL) {
+  $stripelibrary = libraries_load('stripe');
+  if (!empty($stripelibrary['loaded'])) {
+    \Stripe\Stripe::setApiKey(_stripe_api_secret_key($mode));
+  }
   $obj = ucfirst($obj);
   $class = 'Stripe\\' . $obj;
   if ($method) {

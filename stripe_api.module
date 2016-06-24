@@ -42,7 +42,7 @@ function _stripe_api_process_incoming_webhook() {
   $event_json = json_decode($input);
   $event = NULL;
   // Validate the webhook if we are in LIVE mode.
-  if (config_get('stripe_api.settings','stripe_api_mode') === 'live' && ($event_json->livemode == TRUE || $event_json->id !== 'evt_00000000000000')) {
+  if (config_get('stripe_api.settings','mode') === 'live' && ($event_json->livemode == TRUE || $event_json->id !== 'evt_00000000000000')) {
     $event = stripe_api_call('event', 'retrieve', $event_json->id);
     if (!$event) {
       watchdog('stripe_api', 'Invalid webhook event: @data', array(
@@ -69,7 +69,7 @@ function _stripe_api_process_incoming_webhook() {
  * Log incoming webhooks.
  */
 function stripe_api_stripe_api_webhook($type, $data, Stripe\Event $event = NULL) {
-  if (config_get('stripe_api.settings','stripe_api_log_webhooks')) {
+  if (config_get('stripe_api.settings','log_webhooks')) {
     watchdog('stripe_api', 'Processed webhook: @name<br /><br />Data: @data', array(
       '@name' => $type,
       '@data' => json_encode($data),
@@ -91,27 +91,8 @@ function stripe_api_libraries_info() {
       'lines' => 1,
     ),
     'files' => array('php' => array('init.php')),
-    'callbacks' => array('post-load' => array('stripe_api_libraries_postload_callback')),
   );
   return $libraries;
-}
-
-/**
- * Post-load callback for the Stripe PHP Library.
- *
- * @param array $library
- *   An array of library information.
- * @param string $version
- *   If the $library array belongs to a certain version, a string containing the
- *   version.
- * @param string $variant
- *   If the $library array belongs to a certain variant, a string containing the
- *   variant name.
- */
-function stripe_api_libraries_postload_callback($library, $version = NULL, $variant = NULL) {
-  if (!empty($library['loaded'])) {
-    \Stripe\Stripe::setApiKey(_stripe_api_secret_key());
-  }
 }
 
 /**
@@ -125,9 +106,9 @@ function stripe_api_libraries_postload_callback($library, $version = NULL, $vari
  */
 function _stripe_api_secret_key($mode = '') {
   if (!$mode) {
-    $mode = config_get('stripe_api.settings','stripe_api_mode');
+    $mode = config_get('stripe_api.settings','mode');
   }
-  return config_get('stripe_api_secret.settings','stripe_api_' . $mode . '_secret_key');
+  return config_get('stripe_api_secret.settings', $mode . '_secret_key');
 }
 
 /**
@@ -142,7 +123,7 @@ function _stripe_api_secret_key($mode = '') {
 function _stripe_api_public_key($mode = '') {
   $config = config('stripe_api.settings');
   if (!$mode) {
-    $mode = $config->get('stripe_api_mode');
+    $mode = $config->get('mode');
   }
-  return $config->get('stripe_api_' . $mode . '_public_key');
+  return $config->get( $mode . '_public_key');
 }
